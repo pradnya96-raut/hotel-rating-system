@@ -7,13 +7,13 @@ A comprehensive hotel rating system built using Spring Boot microservices archit
 This project implements a microservices architecture with the following components:
 
 ```
-                ┌─────────────────────┐
-                │    API Gateway      │
-                │    Port: 8084       │
-                └─────────┬───────────┘
-                          │
-        ┌─────────────────┴──────────────────────────────┐
-        │                       │                       │
+                     ┌─────────────────────┐
+                     │    API Gateway      │
+                     │    Port: 8084       │
+                     └──────────┬──────────┘
+                                │
+        ┌───────────────────────┴────────────────────────┐
+        │                       │                        │
 ┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
 │   User Service  │    │  Hotel Service  │    │ Rating Service  │
 │   Port: 9090    │    │   Port: 8080    │    │   Port: 9091    │
