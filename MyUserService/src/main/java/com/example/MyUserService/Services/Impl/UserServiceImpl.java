@@ -1,5 +1,6 @@
 package com.example.MyUserService.Services.Impl;
 
+import com.example.MyUserService.ExternalServices.HotelService;
 import com.example.MyUserService.Services.UserService;
 import com.example.MyUserService.entities.Hotel;
 import com.example.MyUserService.entities.Rating;
@@ -28,10 +29,10 @@ public class UserServiceImpl implements UserService {
     @Autowired
     RestTemplate restTemplate;
 
-//    @Autowired
-//    HotelService hotelService;
+    @Autowired
+    HotelService hotelService;
 
-    private Logger logger = LoggerFactory.getLogger(UserServiceImpl.class);
+    final Logger logger = LoggerFactory.getLogger(UserServiceImpl.class);
 
     @Override
     public User createUser(User user) {
@@ -44,7 +45,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public List<User> getAllUser() {
         List<User> allUser = userRepository.findAll();
-//        ArrayList<Rating>forObject = restTemplate.getForObject("http://localhost:9091/ratings/users/"+user.getUserId(), ArrayList.class);
+//        ArrayList<Rating>forObject = restTemplate.getForObject("http://localhost:9091/ratings/", ArrayList.class);
 //        allUser.rating;
 
         return allUser;
@@ -59,13 +60,12 @@ public class UserServiceImpl implements UserService {
         logger.info("{}", ratingsOfUser);
         List<Rating> ratings = Arrays.stream(ratingsOfUser).toList();
 
-        //localhost:8080/hotels/8b732ade-118c-429d-bb3a-949167fc7376
         List<Rating> ratingList = ratings.stream().map(rating -> {
             //api call to hotel service to get the hotel
-            ResponseEntity<Hotel> forEntity = restTemplate.getForEntity("http://HOTELSERVICE/hotels/" + rating.getHotelId(), Hotel.class);
-            Hotel hotel = forEntity.getBody();
+//            ResponseEntity<Hotel> forEntity = restTemplate.getForEntity("http://HOTELSERVICE/hotels/" + rating.getHotelId(), Hotel.class);
+//            Hotel hotel = forEntity.getBody();
 
-            //Hotel hotel = hotelService.getHotel(rating.getHotelId());
+            Hotel hotel = hotelService.getHotel(rating.getHotelId());
             //set hotel to rating
             rating.setHotel(hotel);
             return rating;
