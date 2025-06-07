@@ -1,12 +1,19 @@
 # Hotel Rating System - Microservices Architecture
 
-A comprehensive hotel rating system built using Spring Boot microservices architecture with Eureka service discovery, PostgreSQL databases, and RESTful APIs.
+A comprehensive hotel rating system built using Spring Boot microservices architecture with Eureka service discovery, PostgreSQL databases, RESTful APIs, and an API Gateway for unified routing.
 
 ## 🏗️ Architecture Overview
 
 This project implements a microservices architecture with the following components:
 
 ```
+                ┌─────────────────────┐
+                │    API Gateway      │
+                │    Port: 8084       │
+                └─────────┬───────────┘
+                          │
+        ┌─────────────────┴──────────────────────────────┐
+        │                       │                       │
 ┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
 │   User Service  │    │  Hotel Service  │    │ Rating Service  │
 │   Port: 9090    │    │   Port: 8080    │    │   Port: 9091    │
@@ -23,13 +30,19 @@ This project implements a microservices architecture with the following componen
 
 ## 📋 Services Description
 
-### 1. Service Registry (Eureka Server)
+### 1. API Gateway
+- **Port**: 8084
+- **Purpose**: Central entry point for all client requests. Routes, filters, and aggregates requests to backend microservices. Provides a single endpoint for the system, handles cross-cutting concerns (security, logging, etc.), and simplifies client interaction.
+- **Technology**: Spring Cloud Gateway
+- **URL**: http://localhost:8084
+
+### 2. Service Registry (Eureka Server)
 - **Port**: 8761
 - **Purpose**: Service discovery and registration
 - **Technology**: Spring Cloud Netflix Eureka Server
 - **URL**: http://localhost:8761
 
-### 2. User Service (MyUserService)
+### 3. User Service (MyUserService)
 - **Port**: 9090
 - **Purpose**: Manages user information and profiles
 - **Database**: PostgreSQL (usersDB)
@@ -39,7 +52,7 @@ This project implements a microservices architecture with the following componen
   - Get all users
   - User profile management
 
-### 3. Hotel Service
+### 4. Hotel Service
 - **Port**: 8080 (default)
 - **Purpose**: Manages hotel information
 - **Database**: PostgreSQL (HotelDB)
@@ -49,7 +62,7 @@ This project implements a microservices architecture with the following componen
   - Get all hotels
   - Hotel information management
 
-### 4. Rating Service
+### 5. Rating Service
 - **Port**: 9091
 - **Purpose**: Manages ratings and feedback for hotels
 - **Database**: PostgreSQL (ratingDB)
@@ -63,6 +76,7 @@ This project implements a microservices architecture with the following componen
 
 - **Framework**: Spring Boot 3.4.5
 - **Language**: Java 17
+- **API Gateway**: Spring Cloud Gateway
 - **Service Discovery**: Spring Cloud Netflix Eureka
 - **Database**: PostgreSQL
 - **ORM**: Spring Data JPA with Hibernate
@@ -134,7 +148,14 @@ This project implements a microservices architecture with the following componen
    ```
    Wait for the Eureka server to start (usually takes 30-60 seconds)
 
-3. **Start the microservices** (in separate terminals)
+3. **Start the API Gateway**
+   ```bash
+   cd ApiGateway
+   mvn spring-boot:run
+   ```
+   Wait for the API Gateway to start (port 8084)
+
+4. **Start the microservices** (in separate terminals)
    
    **User Service:**
    ```bash
@@ -154,11 +175,31 @@ This project implements a microservices architecture with the following componen
    mvn spring-boot:run
    ```
 
-4. **Verify the setup**
+5. **Verify the setup**
    - Eureka Dashboard: http://localhost:8761
+   - API Gateway: http://localhost:8084
    - All services should be registered and show as UP
 
 ## 📚 API Documentation
+
+### API Gateway Endpoints (Port: 8084)
+
+All requests to backend services should be made through the API Gateway. The gateway routes requests based on path:
+
+| Method | Gateway Endpoint         | Forwards To                                   |
+|--------|-------------------------|------------------------------------------------|
+| POST   | `/users/`               | User Service `/users/`                         |
+| GET    | `/users/{userId}`       | User Service `/users/{userId}`                 |
+| GET    | `/users/`               | User Service `/users/`                         |
+| POST   | `/hotels/`              | Hotel Service `/hotels/`                       |
+| GET    | `/hotels/{hotelId}`     | Hotel Service `/hotels/{hotelId}`              |
+| GET    | `/hotels/`              | Hotel Service `/hotels/`                       |
+| POST   | `/ratings/`             | Rating Service `/ratings/`                     |
+| GET    | `/ratings/`             | Rating Service `/ratings/`                     |
+| GET    | `/ratings/users/{userId}` | Rating Service `/ratings/users/{userId}`     |
+| GET    | `/ratings/hotels/{hotelId}` | Rating Service `/ratings/hotels/{hotelId}` |
+
+> Example: To create a user, send a POST request to `http://localhost:8084/users/` instead of directly to the User Service.
 
 ### User Service APIs (Port: 9090)
 
@@ -230,6 +271,7 @@ This project implements a microservices architecture with the following componen
 ## 🔧 Configuration
 
 ### Service Ports
+- API Gateway: 8084
 - Service Registry: 8761
 - User Service: 9090
 - Hotel Service: 8080 (default Spring Boot port)
